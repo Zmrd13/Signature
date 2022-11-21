@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "FileToVecClass.h"
-#include "cr/cryptlib.h"
+
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
@@ -30,13 +30,15 @@ lli genMutPrime(lli p) {
     }
     return d;
 }
-lli invEv(lli a,lli b){
-    if((a%b*(extGCD(b,a).at(2)+b))%b){
 
-        return (extGCD(b,a).at(2)+b);
+lli invEv(lli a, lli b) {
+    if ((a % b * (extGCD(b, a).at(2) + b)) % b) {
+
+        return (extGCD(b, a).at(2) + b);
     }
     return 0;
 }
+
 int ElGamalSub(const string &filename) {
     FileVec temp(filename);
     vector<char> hash = hashVec(temp.getCharVec());
@@ -50,34 +52,9 @@ int ElGamalSub(const string &filename) {
     do {
         iG = rand() % (iP - 2) + 2;
     } while (modPow(iG, iQ, iP) == 1);
-    lli x = random(2,iP-1);
-    lli y=modPow(iG,x,iP);
-    lli k = genMutPrime(iP - 1);
-    lli r= modPow(iG,k,iP);
-    vector<lli> hashEncVec;
-
-    for(int i=0;i<MD5_STRING_SIZE;i++){
-
-        lli t=((hash.at(i)-x*r)%(iP-1));
-    //   cout<<t;
-    //    cout<<modPow(invEv(k,iP),t,iP-1);
-     //   cout<<endl;
-        hashEncVec.push_back((invEv(k,iP)*t)%(iP-1));
-    }
-    cout<<endl;
-    for(auto &i:hashEncVec){
-        cout<<i<<" ";
-        cout<<((lli)pow(y,r)*(lli)pow(r,i));
-    }
-    cout<<endl;
-    int count=0;
-    for(int i=0;i<MD5_STRING_SIZE;i++){
-        //cout<<(modPow(iG,hash.at(i),iP))<<" ";
-        cout<< (pow(y,r)*pow(r,hashEncVec.at(i)));
-        count++;
-    }
 
 }
+
 lli genPrime(lli min = 4, lli max = 100) {
     lli temp = 4;
     while (!checkSimple(temp)) {
@@ -86,24 +63,24 @@ lli genPrime(lli min = 4, lli max = 100) {
     }
     return temp;
 }
-int RSASub(const string &filename){
-    lli p,q,n,phi;
 
-    int iter=0;
+int RSASub(const string &filename) {
+    lli p, q, n, phi;
 
-    q= genPrime(4,(lli)pow(10,4));
-    p= genPrime(4,(lli)pow(10,5));
-    n=p*q;
-    phi=(p-1)*(q-1);
-    lli c,d=phi+1;
-    lli check=0;
-    while(d>phi||check==0){
-        d= random(4,phi);
-        if(extGCD(phi,d).at(0)==1){
-            check=1;
-        }
-        else{
-            check=0;
+    int iter = 0;
+
+    q = genPrime(4, (lli) pow(10, 4));
+    p = genPrime(4, (lli) pow(10, 5));
+    n = p * q;
+    phi = (p - 1) * (q - 1);
+    lli c, d = phi + 1;
+    lli check = 0;
+    while (d > phi || check == 0) {
+        d = random(4, phi);
+        if (extGCD(phi, d).at(0) == 1) {
+            check = 1;
+        } else {
+            check = 0;
 
         }
 
@@ -115,16 +92,36 @@ int RSASub(const string &filename){
     //  nlPrint(check);
     //nlPrint( d);
     // nlPrint( extGCD(phi,d));
-    c= invEv(d,phi);
-    vector<lli> hashEncVec;
-
-    for(int i=0;i<MD5_STRING_SIZE;i++){
-   //     hashEncVec.push_back(modPow(invEv(k,iP),t,iP-1));
+    c = invEv(d, phi);
+    vector<lli> hashEncVec(MD5_STRING_SIZE);
+    for (int i = 0; i < MD5_STRING_SIZE; i++) {
+        //     hashEncVec.push_back(modPow(invEv(k,iP),t,iP-1));
+        cout << hash.at(i) << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < MD5_STRING_SIZE; i++) {
+        hashEncVec.at(i) = (modPow(hash.at(i), c, n));
+    }
+//    cout<<endl;
+//    for(int i=0;i<MD5_STRING_SIZE;i++){
+//        //     hashEncVec.push_back(modPow(invEv(k,iP),t,iP-1));
+//
+//        cout<<hashEncVec.at(i)<<" ";
+//    }
+    cout << endl;
+    for (int i = 0; i < MD5_STRING_SIZE; i++) {
+        //     hashEncVec.push_back(modPow(invEv(k,iP),t,iP-1));
+        cout << (char) modPow(hashEncVec.at(i), d, n) << " ";
     }
 
 }
+
+
+
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     string filename = "../test.txt";
-    ElGamalSub(filename);
+    // ElGamalSub(filename);
     RSASub(filename);
+   // cout<<GOST(filename);
 }
